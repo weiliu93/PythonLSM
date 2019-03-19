@@ -1,0 +1,3 @@
+class ImmutableMemtable(object):
+
+    pass

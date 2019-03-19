@@ -1,0 +1,3 @@
+class Memtable(object):
+
+    pass
