@@ -67,6 +67,7 @@ class SkipList(object):
                     self._heads.pop()
             self._size -= 1
         self._global_lock.release()
+        return find
 
     def get(self, key, default=None):
         self._global_lock.acquire()
@@ -98,8 +99,7 @@ class SkipList(object):
 
     def clear(self):
         self._global_lock.acquire()
-        self._heads.clear()
-        self._heads[0] = SkipListNode(-1, -1)
+        self._heads = [SkipListNode(-1, -1)]
         self._size = 0
         self._global_lock.release()
 
@@ -131,7 +131,7 @@ class SkipList(object):
         # build SkipList layer by layer
         key_to_last_node, layer = {}, 0
         while key_value_pairs:
-            self._heads.append(SkipListNode(-1, -1))
+            self._heads.append(SkipListNode(-1, -1, down=self._heads[- 1] if self._heads else None))
             head = self._heads[-1]
             for key, value in key_value_pairs:
                 head.right = SkipListNode(
@@ -148,7 +148,7 @@ class SkipList(object):
             self._heads.append(SkipListNode(-1, -1))
 
     def __len__(self):
-        return self._size
+        return self.size()
 
     def __iter__(self):
         return self.keys()
