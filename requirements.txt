@@ -1,3 +1,5 @@
 black==18.9b0
 pytest==4.3.0
 tox==3.7.0
+murmurhash3==2.3.5
+bitarray==0.8.3
