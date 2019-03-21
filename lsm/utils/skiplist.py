@@ -131,7 +131,9 @@ class SkipList(object):
         # build SkipList layer by layer
         key_to_last_node, layer = {}, 0
         while key_value_pairs:
-            self._heads.append(SkipListNode(-1, -1, down=self._heads[- 1] if self._heads else None))
+            self._heads.append(
+                SkipListNode(-1, -1, down=self._heads[-1] if self._heads else None)
+            )
             head = self._heads[-1]
             for key, value in key_value_pairs:
                 head.right = SkipListNode(

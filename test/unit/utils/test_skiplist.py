@@ -50,6 +50,7 @@ def test_basic_skiplist_put_and_get():
         else:
             assert l.get(value) is None
 
+
 def test_advanced_skiplist_put_and_get():
     comp_dict = {}
     l = SkipList()
@@ -62,13 +63,14 @@ def test_advanced_skiplist_put_and_get():
             key = random.randint(1, 100)
             assert l.get(key) == comp_dict.get(key, None)
 
+
 def test_skiplist_remove():
     l = SkipList({1: 2, 3: 4, 5: 6})
 
     assert l.remove(1) == True
     assert l.size() == 2
 
-    assert l.remove(2)== False
+    assert l.remove(2) == False
     assert l.size() == 2
 
     assert l.remove(5) == True
@@ -103,13 +105,15 @@ def test_skiplist_size():
             comp_dict.pop(key, None)
         assert l.size() == len(comp_dict) and l.size() == len(l)
 
+
 def test_skiplist_keys():
     l, keys = SkipList(), set()
     for _ in range(100):
-        key, value = random.randint(1, 10) , random.randint(1, 100)
+        key, value = random.randint(1, 10), random.randint(1, 100)
         l.put(key, value)
         keys.add(key)
         assert list(l.keys()) == sorted(list(keys))
+
 
 def test_skiplist_items():
     keys = [random.randint(1, 1000) for _ in range(100)]
@@ -122,6 +126,7 @@ def test_skiplist_items():
         l.put(key, value)
         pairs.append((key, value))
         assert sorted(pairs) == list(l.items())
+
 
 def test_skiplist_real_scenario():
     l = SkipList()
@@ -155,6 +160,7 @@ def test_skiplist_real_scenario():
         assert sorted(list(comp_dict.items())) == list(l.items())
         assert len(comp_dict) == len(l)
 
+
 def test_skiplist_multi_thread_put():
     def thread_func(start_value, skiplist):
         for _ in range(50):
@@ -175,6 +181,7 @@ def test_skiplist_multi_thread_put():
             result.result()
     assert len(l) == 55 and l.size() == 55
     assert list(l) == [value for value in range(1, 56)]
+
 
 def _test_case_package_root():
     frame = inspect.currentframe()
