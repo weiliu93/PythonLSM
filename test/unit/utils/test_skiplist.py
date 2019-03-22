@@ -183,6 +183,53 @@ def test_skiplist_multi_thread_put():
     assert list(l) == [value for value in range(1, 56)]
 
 
+def test_skiplist_build_from_iterable():
+    data_dict = {}
+    for _ in range(1000):
+        key, value = random.randint(1, 1000), random.randint(1, 1000)
+        data_dict[key] = value
+
+    l = SkipList(iterable =data_dict)
+    assert len(l) == len(data_dict)
+    assert list(l) == sorted(list(data_dict.keys()))
+
+
+def test_skiplist_build_from_iterable_and_used_in_real_scenario():
+    comp_dict = {}
+    for _ in range(1000):
+        key, value = random.randint(1, 1000) , random.randint(1, 10000)
+        comp_dict[key] = value
+    l = SkipList(comp_dict)
+    # 4, 3, 2, 1
+    ops = ["set", "get", "remove", "clear"]
+    for _ in range(1000000):
+        index = random.randint(1, 10)
+        # set
+        if index <= 4:
+            key, value = random.randint(1, 1000), random.randint(1, 10000)
+            l.put(key, value)
+            comp_dict[key] = value
+        elif index <= 7:
+            key = random.randint(1, 1000)
+            assert l.get(key) == comp_dict.get(key, None)
+        elif index <= 9:
+            # remove
+            key = random.randint(1, 1000)
+            if key in comp_dict:
+                assert l.remove(key) == True
+                comp_dict.pop(key, None)
+            else:
+                assert l.remove(key) == False
+        else:
+            # clear
+            l.clear()
+            comp_dict.clear()
+        # check keys, items, size
+        assert sorted(list(comp_dict.keys())) == list(l.keys())
+        assert sorted(list(comp_dict.items())) == list(l.items())
+        assert len(comp_dict) == len(l)
+
+
 def _test_case_package_root():
     frame = inspect.currentframe()
     while frame:

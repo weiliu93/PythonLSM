@@ -1,5 +1,6 @@
 import random
 import threading
+from collections import deque
 
 
 class SkipList(object):
@@ -126,28 +127,66 @@ class SkipList(object):
             iterable_dict = {key: value for key, value in iterable}
         keys = sorted(list(iterable_dict.keys()))
         key_value_pairs = [(key, iterable_dict[key]) for key in keys]
-        self._size = len(keys)
-        self._heads = []
-        # build SkipList layer by layer
-        key_to_last_node, layer = {}, 0
-        while key_value_pairs:
-            self._heads.append(
-                SkipListNode(-1, -1, down=self._heads[-1] if self._heads else None)
-            )
-            head = self._heads[-1]
-            for key, value in key_value_pairs:
-                head.right = SkipListNode(
-                    key, value, right=None, down=key_to_last_node.get(key, None)
-                )
-                head = head.right
-                key_to_last_node[key] = head
-            if len(key_value_pairs) == 1:
-                break
-            else:
-                key_value_pairs = key_value_pairs[::2]
-        # iterable is empty
-        if not key_value_pairs:
-            self._heads.append(SkipListNode(-1, -1))
+        if key_value_pairs:
+            self._size = len(keys)
+            self._heads = []
+            # build SkipList layer by layer, it should be a BST structure
+            key_to_last_node = {}
+            queue = deque()
+            queue.append([0, len(key_value_pairs) - 1])
+            while queue:
+                next_layer = []
+                self._heads.append(SkipListNode(-1, -1))
+                current_head = self._heads[-1]
+                # link head nodes together in next linkedlist
+                if len(self._heads) > 1:
+                    self._heads[-2].down = self._heads[-1]
+                # has_next_layer means we have intervals need to be split in next layer
+                # otherwise current layer is the bottom layer
+                has_next_layer = False
+                while queue:
+                    element = queue.popleft()
+                    # interval
+                    if isinstance(element, list):
+                        # split interval into [interval1] + mid_element + [interval2],
+                        # interval1 and interval2 could be empty
+                        low, high = element[0], element[1]
+                        mid = low + (high - low) // 2
+                        new_node = SkipListNode(key_value_pairs[mid][0], key_value_pairs[mid][1])
+                        current_head.right = new_node
+                        current_head = current_head.right
+                        if mid > low:
+                            next_layer.append([low, mid - 1])
+                            has_next_layer = True
+                        next_layer.append(key_value_pairs[mid])
+                        if mid < high:
+                            next_layer.append([mid + 1 , high])
+                            has_next_layer = True
+                        if new_node.key in key_to_last_node:
+                            key_to_last_node[new_node.key].down = new_node
+                        key_to_last_node[new_node.key] = new_node
+                    # key-value tuple
+                    elif isinstance(element, tuple):
+                        new_node = SkipListNode(element[0], element[1])
+                        current_head.right = new_node
+                        current_head = current_head.right
+                        # just sink current element to next layer, since it should
+                        # exists in all layers below
+                        next_layer.append(element)
+                        if new_node.key in key_to_last_node:
+                            key_to_last_node[new_node.key].down = new_node
+                        key_to_last_node[new_node.key] = new_node
+                    else:
+                        raise Exception("Illegal data type in SkipList construction")
+                # need to break here, since queue need to be empty for outer check
+                if not has_next_layer:
+                    break
+                queue.extend(next_layer)
+            self._heads.reverse()
+        else:
+            # iterable is empty, add a dummy head in first layer
+            self._heads = [SkipListNode(-1, -1)]
+            self._size = 0
 
     def __len__(self):
         return self.size()
