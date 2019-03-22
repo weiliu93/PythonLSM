@@ -167,7 +167,7 @@ def test_skiplist_multi_thread_put():
             skiplist.put(start_value, start_value)
             start_value += 1
 
-    l = SkipList()
+    l = SkipList(global_lock=True)
     with concurrent.futures.ThreadPoolExecutor(max_workers=6) as pool:
         for start_value in [1, 100, 1000, 10000, 100000, 1000000]:
             result = pool.submit(thread_func, start_value, l)

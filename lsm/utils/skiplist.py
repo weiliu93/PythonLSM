@@ -6,14 +6,17 @@ from collections import deque
 class SkipList(object):
     """naive version concurrent SkipList, basic functionality"""
 
-    def __init__(self, iterable=None):
+    def __init__(self, iterable=None, global_lock=False):
         iterable = iterable if iterable else []
         assert (
             iter(iterable) != iterable
         ), "Iterable collection should be provided, not iterable or other illegal data types"
         iterable = iterable if iterable else []
         self._build_from_iterable(iterable)
-        self._global_lock = threading.Lock()
+        if global_lock:
+            self._global_lock = threading.Lock()
+        else:
+            self._global_lock = DummyLock()
 
     @property
     def layer(self):
@@ -197,6 +200,13 @@ class SkipList(object):
     def __str__(self):
         key_value_pairs = list(self.items())
         return "{" + (", ".join(map(str, key_value_pairs))) + "}"
+
+class DummyLock(object):
+    """dummy lock, won't do anything, just use same interfaces"""
+    def acquire(self):
+        pass
+    def release(self):
+        pass
 
 
 # TODO

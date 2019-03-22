@@ -1,4 +1,3 @@
-import random
 from bitarray import bitarray
 
 import bloomfilter_hash_functions
@@ -25,6 +24,10 @@ class StringBloomFilter(object):
     @property
     def funcs(self):
         return len(self._hash_functions)
+
+    @property
+    def bitmap(self):
+        return self._bitmap
 
     def add(self, value):
         value = self._process_value(value)
@@ -65,4 +68,5 @@ class StringBloomFilter(object):
         return value
 
     def __str__(self):
-        return str(self._bitmap)
+        output = "bits: {}, funcs: {}, bitmap: {}".format(self.bits, self.funcs, self.bitmap)
+        return output
