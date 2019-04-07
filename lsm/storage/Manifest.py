@@ -1,0 +1,3 @@
+class Manifest(object):
+
+    pass
