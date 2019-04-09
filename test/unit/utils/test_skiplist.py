@@ -189,7 +189,7 @@ def test_skiplist_build_from_iterable():
         key, value = random.randint(1, 1000), random.randint(1, 1000)
         data_dict[key] = value
 
-    l = SkipList(iterable =data_dict)
+    l = SkipList(iterable=data_dict)
     assert len(l) == len(data_dict)
     assert list(l) == sorted(list(data_dict.keys()))
 
@@ -197,7 +197,7 @@ def test_skiplist_build_from_iterable():
 def test_skiplist_build_from_iterable_and_used_in_real_scenario():
     comp_dict = {}
     for _ in range(1000):
-        key, value = random.randint(1, 1000) , random.randint(1, 10000)
+        key, value = random.randint(1, 1000), random.randint(1, 10000)
         comp_dict[key] = value
     l = SkipList(comp_dict)
     # 4, 3, 2, 1

@@ -68,5 +68,7 @@ class StringBloomFilter(object):
         return value
 
     def __str__(self):
-        output = "bits: {}, funcs: {}, bitmap: {}".format(self.bits, self.funcs, self.bitmap)
+        output = "bits: {}, funcs: {}, bitmap: {}".format(
+            self.bits, self.funcs, self.bitmap
+        )
         return output

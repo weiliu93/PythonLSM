@@ -155,7 +155,9 @@ class SkipList(object):
                         # interval1 and interval2 could be empty
                         low, high = element[0], element[1]
                         mid = low + (high - low) // 2
-                        new_node = SkipListNode(key_value_pairs[mid][0], key_value_pairs[mid][1])
+                        new_node = SkipListNode(
+                            key_value_pairs[mid][0], key_value_pairs[mid][1]
+                        )
                         current_head.right = new_node
                         current_head = current_head.right
                         if mid > low:
@@ -163,7 +165,7 @@ class SkipList(object):
                             has_next_layer = True
                         next_layer.append(key_value_pairs[mid])
                         if mid < high:
-                            next_layer.append([mid + 1 , high])
+                            next_layer.append([mid + 1, high])
                             has_next_layer = True
                         if new_node.key in key_to_last_node:
                             key_to_last_node[new_node.key].down = new_node
@@ -201,10 +203,13 @@ class SkipList(object):
         key_value_pairs = list(self.items())
         return "{" + (", ".join(map(str, key_value_pairs))) + "}"
 
+
 class DummyLock(object):
     """dummy lock, won't do anything, just use same interfaces"""
+
     def acquire(self):
         pass
+
     def release(self):
         pass
 

@@ -24,44 +24,9 @@ package_root = os.path.abspath(
         os.path.pardir,
         "packages",
         "storage",
-        "key_value_pair",
+        "internal_key_value",
     )
 )
-
-
-from key_value_pair import KeyValuePair, KeyValuePairHeader, KeyValuePairHeaderFlag
-
-
-def test_key_value_pair_serialization():
-    package_path = _test_case_package_root()
-    _clean_up()
-
-    pair = KeyValuePair("hello", "world", 24)
-    byte_array = pair.to_byte_array()
-    tmp_path = os.path.join(package_path, "tmp.txt")
-    with open(tmp_path, "wb") as f:
-        f.write(byte_array)
-
-    another_pair = KeyValuePair.load_from_data_stream(open(tmp_path, "rb"))
-    assert (
-        another_pair.key == "hello"
-        and another_pair.value == "world"
-        and another_pair.header.flags == 24
-    )
-
-    _clean_up()
-
-
-def test_key_value_pair_header_flag_check():
-    pair = KeyValuePair("hey", "world", KeyValuePairHeaderFlag.KEY_DELETED)
-    assert pair.header.is_deleted() == True
-
-
-def test_key_value_pair_header_flag_update():
-    pair = KeyValuePair("haha", "world")
-    assert pair.header.is_deleted() == False
-    pair.header.set_flag(KeyValuePairHeaderFlag.KEY_DELETED)
-    assert pair.header.is_deleted() == True
 
 
 def _test_case_package_root():
