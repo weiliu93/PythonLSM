@@ -12,23 +12,23 @@ class KeyType(Enum):
 class InternalKeyValue(object):
     """Internal key value pair representation"""
 
-    def __init__(self, key, sequence_num, type=KeyType.PUT, value=None):
+    def __init__(self, key, sequence_number, type=KeyType.PUT, value=None):
         """
-        type  + sequence_num  + key_size +    key    +    value_size +  value
-        1bit       63bit         32bit     var-length       32bit     var-length
+        type  + sequence_number +  key_size +    key    +    value_size +  value
+        1bit       63bit            32bit     var-length       32bit     var-length
         """
         assert isinstance(type, KeyType)
         assert key is not None
-        assert sequence_num >= 0
+        assert sequence_number >= 0
 
         self.type = type
-        self.sequence_num = sequence_num
+        self.sequence_number = sequence_number
         self.key = key
         self.value = value
 
     def __str__(self):
-        return "(type: {}, sequence_num: {}, key: {}, value: {})".format(
-            self.type, self.sequence_num, self.key, self.value
+        return "(type: {}, sequence_number: {}, key: {}, value: {})".format(
+            self.type, self.sequence_number, self.key, self.value
         )
 
     def __lt__(self, other):
@@ -38,7 +38,7 @@ class InternalKeyValue(object):
             return False
         else:
             # sequence num could not be the same
-            if self.sequence_num < other.sequence_num:
+            if self.sequence_number < other.sequence_number:
                 return True
             else:
                 return False
@@ -50,9 +50,9 @@ class InternalKeyValue(object):
         """serialize internal key-value pair to byte_array, only pickle objects when necessary"""
         byte_array = bytearray()
         header = (
-            self.sequence_num | (1 << 63)
+            self.sequence_number | (1 << 63)
             if self.type == KeyType.PUT
-            else self.sequence_num
+            else self.sequence_number
         )
         # append header first
         byte_array.extend(byte_utils.integer_to_n_bytes_array(header, 8))
@@ -98,16 +98,16 @@ class InternalKeyValue(object):
                 return None
             key, value = pickle.loads(key_byte_array), pickle.loads(value_byte_array)
             return InternalKeyValue(
-                key=key, sequence_num=sequence_number, type=type, value=value
+                key=key, sequence_number=sequence_number, type=type, value=value
             )
         else:
             key = pickle.loads(key_byte_array)
-            return InternalKeyValue(key=key, sequence_num=sequence_number, type=type)
+            return InternalKeyValue(key=key, sequence_number=sequence_number, type=type)
 
     @staticmethod
-    def delete_key(key, sequence_num):
-        return InternalKeyValue(key, sequence_num, type=KeyType.DELETE)
+    def delete_key(key, sequence_number):
+        return InternalKeyValue(key, sequence_number, type=KeyType.DELETE)
 
     @staticmethod
-    def put_key(key, value, sequence_num):
-        return InternalKeyValue(key, sequence_num, type=KeyType.PUT, value=value)
+    def put_key(key, value, sequence_number):
+        return InternalKeyValue(key, sequence_number, type=KeyType.PUT, value=value)
