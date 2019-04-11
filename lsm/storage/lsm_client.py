@@ -1,7 +1,5 @@
 class LSMClient(object):
     def __init__(self, conf_path=None):
-        # TODO lsm_conf and manifest
-
 
         pass
 

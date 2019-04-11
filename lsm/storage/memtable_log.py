@@ -37,7 +37,7 @@ class MemtableLog(object):
     def immutable(self):
         # transfer log from mutable to immutable
         self._file.close()
-        os.rename(self._filepath, self._filepath + ".immutable")
+        os.replace(self._filepath, self._filepath + ".immutable")
         self._file = open(self._filepath, "ab")
         return ImmutableMemtableLog(self._filepath + ".immutable")
 

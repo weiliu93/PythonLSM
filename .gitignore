@@ -2,5 +2,6 @@
 .venv/
 .tox/
 .pytest_cache/
+sstables/
 __pycache__/
 *.pyc
