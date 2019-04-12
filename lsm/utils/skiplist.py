@@ -2,6 +2,8 @@ import random
 import threading
 from collections import deque
 
+from log_util import logger
+
 
 class SkipList(object):
     """naive version concurrent SkipList, basic functionality"""
@@ -89,6 +91,45 @@ class SkipList(object):
                 current = current.down
         self._global_lock.release()
         return default
+
+    def ceiling(self, key):
+        self._global_lock.acquire()
+        current = self._heads[-1]
+        while current:
+            while current.right and current.right.key < key:
+                current = current.right
+            # we found the key
+            if current.right and current.right.key == key:
+                result = current.right
+                self._global_lock.release()
+                return result.key, result.value if result else None
+            else:
+                # if we can jump to the next layer
+                if current.down:
+                    current = current.down
+                else:
+                    # In bottom layer, current.right is what we want
+                    result = current.right if current.right else None
+                    self._global_lock.release()
+                    return (result.key, result.value) if result else None
+        logger.error("ceiling code couldn't reach here", key=key)
+
+    def floor(self, key):
+        self._global_lock.acquire()
+        current, is_head = self._heads[-1], True
+        while current:
+            while current.right and current.right.key <= key:
+                current = current.right
+                is_head = False
+            # if we can jump to the next layer
+            if current.down:
+                current = current.down
+            else:
+                # it is head node, it means floor found nothing
+                result = current if not is_head else None
+                self._global_lock.release()
+                return (result.key, result.value) if result else None
+        logger.error("floor code couldn't reach here", key=key)
 
     def keys(self):
         return map(lambda item: item[0], self.items())

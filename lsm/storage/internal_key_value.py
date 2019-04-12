@@ -43,8 +43,36 @@ class InternalKeyValue(object):
             else:
                 return False
 
+    def __le__(self, other):
+        if isinstance(other, InternalKeyValue):
+            return self < other or self == other
+        else:
+            return False
+
+    def __ge__(self, other):
+        if isinstance(other, InternalKeyValue):
+            return self > other or self == other
+        else:
+            return False
+
     def __gt__(self, other):
         return not self.__lt__(other)
+
+    def __eq__(self, other):
+        if isinstance(other, InternalKeyValue):
+            # (key, sequence_number) must be a unique identity
+            return (self.key, self.sequence_number) == (
+                other.key,
+                other.sequence_number,
+            )
+        else:
+            return False
+
+    def __hash__(self):
+        hash_value = 31
+        hash_value = hash_value * 37 + hash(self.key)
+        hash_value = hash_value * 37 + self.sequence_number
+        return hash_value
 
     def serialize(self):
         """serialize internal key-value pair to byte_array, only pickle objects when necessary"""

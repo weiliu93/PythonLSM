@@ -2,6 +2,9 @@
 .venv/
 .tox/
 .pytest_cache/
-sstables/
 __pycache__/
 *.pyc
+
+# LSM disk files
+sstables/
+sequence_number

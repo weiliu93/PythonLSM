@@ -64,6 +64,67 @@ def test_advanced_skiplist_put_and_get():
             assert l.get(key) == comp_dict.get(key, None)
 
 
+def test_skiplist_ceiling():
+    skiplist = SkipList()
+    skiplist.put((1, 10), 100)
+    skiplist.put((1, 100), 5)
+    skiplist.put((4, 10), 7)
+    skiplist.put((7, 100), 200)
+
+    ceiling_result = skiplist.ceiling((1, 5))
+    assert ceiling_result == ((1, 10), 100)
+
+    ceiling_result = skiplist.ceiling((1, 50))
+    assert ceiling_result == ((1, 100), 5)
+
+    ceiling_result = skiplist.ceiling((3, 10))
+    assert ceiling_result == ((4, 10), 7)
+
+    ceiling_result = skiplist.ceiling((4, 10))
+    assert ceiling_result == ((4, 10), 7)
+
+    ceiling_result = skiplist.ceiling((4, 12))
+    assert ceiling_result == ((7, 100), 200)
+
+    ceiling_result = skiplist.ceiling((-1, -1))
+    assert ceiling_result == ((1, 10), 100)
+
+    ceiling_result = skiplist.ceiling((7, 200))
+    assert ceiling_result == None
+
+
+def test_skiplist_floor():
+    skiplist = SkipList()
+    skiplist.put((1, 10), 100)
+    skiplist.put((1, 100), 5)
+    skiplist.put((4, 10), 7)
+    skiplist.put((7, 100), 200)
+
+    floor_result = skiplist.floor((1, 5))
+    assert floor_result == None
+
+    floor_result = skiplist.floor((-1, -1))
+    assert floor_result == None
+
+    floor_result = skiplist.floor((1, 80))
+    assert floor_result == ((1, 10), 100)
+
+    floor_result = skiplist.floor((3, 10))
+    assert floor_result == ((1, 100), 5)
+
+    floor_result = skiplist.floor((4, 10))
+    assert floor_result == ((4, 10), 7)
+
+    floor_result = skiplist.floor((5, 100))
+    assert floor_result == ((4, 10), 7)
+
+    floor_result = skiplist.floor((7, 200))
+    assert floor_result == ((7, 100), 200)
+
+    floor_result = skiplist.floor((10, 10))
+    assert floor_result == ((7, 100), 200)
+
+
 def test_skiplist_remove():
     l = SkipList({1: 2, 3: 4, 5: 6})
 
