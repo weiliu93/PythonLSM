@@ -1,12 +1,13 @@
-from enum import Enum
 import pickle
+import sys
+import os
 
-from lsm.utils import byte_utils
+sys.path.append(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir))
+)
 
-
-class KeyType(Enum):
-    PUT = 0
-    DELETE = 1
+from utils import byte_utils
+from internal_key import KeyType, InternalKey
 
 
 class InternalKeyValue(object):
@@ -17,7 +18,6 @@ class InternalKeyValue(object):
         type  + sequence_number +  key_size +    key    +    value_size +  value
         1bit       63bit            32bit     var-length       32bit     var-length
         """
-        assert isinstance(type, KeyType)
         assert key is not None
         assert sequence_number >= 0
 
@@ -97,6 +97,9 @@ class InternalKeyValue(object):
             # value byte array
             byte_array.extend(pickle_value)
         return bytes(byte_array)
+
+    def extract_internal_key(self):
+        return InternalKey(self.key, self.sequence_number, self.type)
 
     @staticmethod
     def deserialize(file_io):

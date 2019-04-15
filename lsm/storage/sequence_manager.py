@@ -1,8 +1,13 @@
 import threading
 import configparser
 import os
+import sys
 
-from lsm.utils.log_util import logger
+sys.path.append(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir))
+)
+
+from logger.log_util import logger
 
 
 class SequenceManager(object):

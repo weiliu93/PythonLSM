@@ -19,18 +19,6 @@ sys.path.append(
     )
 )
 
-
-package_root = os.path.abspath(
-    os.path.join(
-        os.path.dirname(__file__),
-        os.path.pardir,
-        os.path.pardir,
-        "packages",
-        "utils",
-        "skiplist",
-    )
-)
-
 from skiplist import SkipList
 
 

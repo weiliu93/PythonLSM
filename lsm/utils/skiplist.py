@@ -1,8 +1,15 @@
 import random
 import threading
 from collections import deque
+import os
+import sys
 
-from log_util import logger
+
+sys.path.append(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir))
+)
+
+from logger.log_util import logger
 
 
 class SkipList(object):

@@ -1,6 +1,12 @@
 import os
+import sys
 
-from lsm.storage.internal_key_value import InternalKeyValue
+
+sys.path.append(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir))
+)
+
+from storage.internal_key_value import InternalKeyValue
 
 
 class MemtableLog(object):
