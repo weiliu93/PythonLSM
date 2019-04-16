@@ -31,7 +31,7 @@ package_root = os.path.abspath(
     )
 )
 
-from bloomfilter import StringBloomFilter
+from bloomfilter import BytesBloomFilter
 from bloomfilter_hash_functions import (
     Murmur32HashFunction,
     MD5HashFunction,
@@ -41,7 +41,7 @@ from bloomfilter_hash_functions import (
 
 def test_basic_add_and_existing_check():
     func_dict = {Murmur32HashFunction: 3, MD5HashFunction: 3, SHA1HashFunction: 3}
-    filter = StringBloomFilter(func_dict, bits=1024)
+    filter = BytesBloomFilter(func_dict, bits=1024)
     s = set()
     values = ["sdf", "bw", "we", "bsd", "were", "hey"]
     missing_values = ["bwer", "bdsaf", "zsdf", "fewe"]
@@ -55,15 +55,15 @@ def test_basic_add_and_existing_check():
 
 def test_bloom_filter_bits_is_always_power_of_two():
     func_dict = {Murmur32HashFunction: 3, MD5HashFunction: 3, SHA1HashFunction: 3}
-    filter = StringBloomFilter(func_dict, bits=random.randint(1, 10000))
+    filter = BytesBloomFilter(func_dict, bits=random.randint(1, 10000))
     bits = filter.bits
     assert bits & (-bits) == bits
 
 
 def test_bloom_filter_or():
     func_dict = {Murmur32HashFunction: 3, MD5HashFunction: 3, SHA1HashFunction: 3}
-    filter1 = StringBloomFilter(func_dict, bits=20)
-    filter2 = StringBloomFilter(func_dict, bits=20)
+    filter1 = BytesBloomFilter(func_dict, bits=20)
+    filter2 = BytesBloomFilter(func_dict, bits=20)
     filter1.add("dsf")
     filter1.add("bsdf")
     filter2.add("bdfdsf")
@@ -80,7 +80,7 @@ def test_bloom_filter_or():
 def test_bloom_filter_in_real_scenario():
     func_dict = {Murmur32HashFunction: 5, MD5HashFunction: 5, SHA1HashFunction: 5}
     epoch, cnt, vis = 100000, 0, set()
-    filter = StringBloomFilter(func_dict, size_estimate=epoch)
+    filter = BytesBloomFilter(func_dict, size_estimate=epoch)
     for _ in range(epoch):
         random_string = "".join(
             random.choices(string.ascii_letters + string.digits, k=20)

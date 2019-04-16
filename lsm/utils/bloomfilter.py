@@ -1,21 +1,58 @@
+import sys
+import os
+import pickle
 from bitarray import bitarray
 
-import bloomfilter_hash_functions
+sys.path.append(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir))
+)
+
+from utils.byte_utils import integer_to_four_bytes_array
+from utils.byte_utils import integer_to_n_bytes_array
+from utils.byte_utils import byte_array_to_bitarray
+from utils.byte_utils import bitarray_to_byte_array
+from utils.byte_utils import byte_array_to_integer
+from utils import bloomfilter_hash_functions
 
 
-class StringBloomFilter(object):
-    def __init__(self, func_dict, bits=1024, size_estimate=None):
-        self._hash_functions = []
-        self._bits = self._ceiling_bits(bits)
-        if size_estimate is not None:
-            self._bits = self._ceiling_bits(size_estimate) * 16
-        self._bitmap = bitarray(self._bits)
-        self._bitmap.setall(False)
-        assert isinstance(func_dict, dict)
-        for hash_class, count in func_dict.items():
-            assert issubclass(hash_class, bloomfilter_hash_functions.HashFunction)
-            for _ in range(count):
-                self._hash_functions.append(hash_class(self._bits))
+class BytesBloomFilter(object):
+    def __init__(
+        self,
+        func_dict=None,
+        hash_functions=None,
+        bits=1024,
+        size_estimate=None,
+        bitmap=None,
+    ):
+        if bitmap:
+            assert isinstance(bitmap, bitarray)
+            self._bits = self._ceiling_bits(len(bitmap))
+            self._bitmap = bitarray(self._bits)
+            self._bitmap.setall(False)
+            self._bitmap = self._bitmap | bitmap
+        else:
+            self._bits = (
+                self._ceiling_bits(bits)
+                if size_estimate is None
+                else self._ceiling_bits(size_estimate) * 16
+            )
+            self._bitmap = bitarray(self._bits)
+            self._bitmap.setall(False)
+
+        if hash_functions:
+            self._hash_functions = hash_functions
+        else:
+            func_dict = func_dict or {
+                bloomfilter_hash_functions.Murmur32HashFunction: 4,
+                bloomfilter_hash_functions.MD5HashFunction: 4,
+                bloomfilter_hash_functions.SHA1HashFunction: 4,
+            }
+            assert isinstance(func_dict, dict)
+            self._hash_functions = []
+            for hash_class, count in func_dict.items():
+                self._hash_functions.extend(
+                    [hash_class(self._bits) for _ in range(count)]
+                )
 
     @property
     def bits(self):
@@ -37,11 +74,11 @@ class StringBloomFilter(object):
 
     def __or__(self, other):
         # check if two bloom filter is compatible
-        assert self.bits == other.bits, "Two StringBloomFilter should have same bits"
+        assert self.bits == other.bits, "Two BytesBloomFilter should have same bits"
         assert set(map(lambda func: type(func), self._hash_functions)) == set(
             map(lambda func: type(func), other._hash_functions)
-        ), "Two StringBloomFilter should have same hash functions"
-        filter = StringBloomFilter({})
+        ), "Two BytesBloomFilter should have same hash functions"
+        filter = BytesBloomFilter({})
         filter._hash_functions = self._hash_functions.copy()
         filter._bits = self._bits
         filter._bitmap = self._bitmap | other._bitmap
@@ -55,6 +92,35 @@ class StringBloomFilter(object):
                 return False
         return True
 
+    def __len__(self):
+        return self._bits
+
+    def serialize(self):
+        """
+        Hash
+        bitmap_length + bitmap + hash_functions_length + [func_length + func_bytes] * hash_functions_length
+            32bit                       8bit                 32bit
+        """
+        byte_array = bytearray()
+        # bitmap first
+        byte_array.extend(integer_to_four_bytes_array(len(self._bitmap)))
+        byte_array.extend(bitarray_to_byte_array(self._bitmap))
+        # then hash functions
+        byte_array.append(integer_to_n_bytes_array(len(self._hash_functions), 1))
+        for func in self._hash_functions:
+            func_object = pickle.dumps(func)
+            byte_array.extend(integer_to_four_bytes_array(len(func_object)))
+            byte_array.extend(func_object)
+        return bytes(byte_array)
+
+    @staticmethod
+    def deserialize(file_io):
+        # TODO
+
+
+
+        pass
+
     def _ceiling_bits(self, bits):
         ans = 1
         while ans < bits:
@@ -62,6 +128,7 @@ class StringBloomFilter(object):
         return ans
 
     def _process_value(self, value):
+        # TODO should I retain this special check? since this is a BytesBloomFilter...
         if isinstance(value, str):
             value = value.encode("utf-8")
         assert isinstance(value, bytes)

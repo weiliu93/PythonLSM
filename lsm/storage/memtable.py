@@ -29,8 +29,10 @@ class Memtable(object):
         self._memtable_log = MemtableLog(memtable_log_filepath)
         # recover from memtable log
         self._skiplist = SkipList(
-            [(internal_key_value.extract_internal_key(), internal_key_value.value) for
-            internal_key_value in self._memtable_log.logs()]
+            [
+                (internal_key_value.extract_internal_key(), internal_key_value.value)
+                for internal_key_value in self._memtable_log.logs()
+            ]
         )
 
     def put(self, key, value):
@@ -48,7 +50,9 @@ class Memtable(object):
             else self._sequence_manager.current
         )
         # type is a placeholder here
-        floor_key, floor_value = self._skiplist.floor(InternalKey(key, sequence_number, KeyType.PUT))
+        floor_key, floor_value = self._skiplist.floor(
+            InternalKey(key, sequence_number, KeyType.PUT)
+        )
         # need to check key again, since we use floor here
         if floor_key.key == key:
             assert floor_key.sequence_number <= sequence_number
@@ -69,7 +73,16 @@ class Memtable(object):
         return self._skiplist.items()
 
     def __str__(self):
-        return "{" + ", ".join(["(" + str(key) + ": " + str(value) + ")" for key, value in self.items()]) + "}"
+        return (
+            "{"
+            + ", ".join(
+                [
+                    "(" + str(key) + ": " + str(value) + ")"
+                    for key, value in self.items()
+                ]
+            )
+            + "}"
+        )
 
     def _group_write_into_batch(self, update_operations):
         """group writes into one batch, remove redundant writes"""

@@ -28,6 +28,8 @@ package_root = os.path.abspath(
     )
 )
 
+from internal_key_value import InternalKeyValue
+
 
 def _test_case_package_root():
     frame = inspect.currentframe()
