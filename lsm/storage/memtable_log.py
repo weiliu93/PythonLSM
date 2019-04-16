@@ -44,8 +44,8 @@ class MemtableLog(object):
         # transfer log from mutable to immutable
         self._file.close()
         os.replace(self._filepath, self._filepath + ".immutable")
+        # always create a new file
         self._file = open(self._filepath, "ab")
-        return ImmutableMemtableLog(self._filepath + ".immutable")
 
 
 class ImmutableMemtableLog(object):

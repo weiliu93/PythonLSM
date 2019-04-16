@@ -7,7 +7,7 @@ class LSMClient(object):
 
         pass
 
-    def delete(self, key):
+    def remove(self, key):
 
         pass
 

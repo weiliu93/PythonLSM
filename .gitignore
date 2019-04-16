@@ -8,3 +8,6 @@ __pycache__/
 # LSM disk files
 sstables/
 sequence_number
+
+# memtable disk logs
+memtable/
