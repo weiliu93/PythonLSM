@@ -25,6 +25,11 @@ class HashFunction(object):
         """all hash functions need to override this template function"""
         return 0
 
+    def __str__(self):
+        return "(Function name: {}, Bits: {})".format(
+            self.__class__.__name__, self._bits
+        )
+
 
 class Murmur32HashFunction(HashFunction):
     def _hash(self, value):

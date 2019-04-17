@@ -59,8 +59,8 @@ class BytesBloomFilter(object):
         return self._bits
 
     @property
-    def funcs(self):
-        return len(self._hash_functions)
+    def hash_functions(self):
+        return self._hash_functions
 
     @property
     def bitmap(self):
@@ -97,16 +97,16 @@ class BytesBloomFilter(object):
 
     def serialize(self):
         """
-        Hash
-        bitmap_length + bitmap + hash_functions_length + [func_length + func_bytes] * hash_functions_length
-            32bit                       8bit                 32bit
+        bitmap_byte_array_length + bitmap + hash_functions_length + [func_length + func_bytes] * hash_functions_length
+            32bit                                8bit                   32bit
         """
         byte_array = bytearray()
         # bitmap first
-        byte_array.extend(integer_to_four_bytes_array(len(self._bitmap)))
-        byte_array.extend(bitarray_to_byte_array(self._bitmap))
+        bitmap_byte_array = bitarray_to_byte_array(self._bitmap)
+        byte_array.extend(integer_to_four_bytes_array(len(bitmap_byte_array)))
+        byte_array.extend(bitmap_byte_array)
         # then hash functions
-        byte_array.append(integer_to_n_bytes_array(len(self._hash_functions), 1))
+        byte_array.extend(integer_to_n_bytes_array(len(self._hash_functions), 1))
         for func in self._hash_functions:
             func_object = pickle.dumps(func)
             byte_array.extend(integer_to_four_bytes_array(len(func_object)))
@@ -115,27 +115,49 @@ class BytesBloomFilter(object):
 
     @staticmethod
     def deserialize(file_io):
-        # TODO
-
-
-
-        pass
+        bitmap_length = file_io.read(4)
+        if len(bitmap_length) != 4:
+            return None
+        bitmap_length = byte_array_to_integer(bitmap_length)
+        bitmap = file_io.read(bitmap_length)
+        if len(bitmap) != bitmap_length:
+            return None
+        bitmap = byte_array_to_bitarray(bitmap)
+        hash_function_length = file_io.read(1)
+        if len(hash_function_length) != 1:
+            return None
+        hash_function_length = byte_array_to_integer(hash_function_length)
+        hash_functions = []
+        for _ in range(hash_function_length):
+            func_length = file_io.read(4)
+            if len(func_length) != 4:
+                return None
+            func_length = byte_array_to_integer(func_length)
+            func_bytes = file_io.read(func_length)
+            if len(func_bytes) != func_length:
+                return None
+            hash_functions.append(pickle.loads(func_bytes))
+        return BytesBloomFilter(hash_functions=hash_functions, bitmap=bitmap)
 
     def _ceiling_bits(self, bits):
+        # ceiling bits to the power of 8, so it could always be stored in a byte array
         ans = 1
         while ans < bits:
+            ans <<= 1
+        # power of 8
+        while (ans & ((1 << 3) - 1)) != 0:
             ans <<= 1
         return ans
 
     def _process_value(self, value):
-        # TODO should I retain this special check? since this is a BytesBloomFilter...
+        # special check for common string usage
         if isinstance(value, str):
             value = value.encode("utf-8")
         assert isinstance(value, bytes)
         return value
 
     def __str__(self):
-        output = "bits: {}, funcs: {}, bitmap: {}".format(
-            self.bits, self.funcs, self.bitmap
+        output = "bits: {}, hash_functions: {}, bitmap: {}".format(
+            self.bits, self.hash_functions, self.bitmap
         )
         return output

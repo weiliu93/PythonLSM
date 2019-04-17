@@ -13,5 +13,4 @@ class SSTable(object):
 
     # TODO more design
 
-
     pass

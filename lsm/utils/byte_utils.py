@@ -9,17 +9,15 @@ def byte_array_to_integer(byte_array):
     return result
 
 
-def byte_array_to_bitarray(byte_array, length=None):
+def byte_array_to_bitarray(byte_array):
     """byte_array to bitarray, from left to right. First length bit will be chose"""
-    length = length or len(byte_array) * 8
+    length = len(byte_array) * 8
     result = bitarray(length)
     result.setall(False)
     for index, b in enumerate(byte_array):
-        if index * 8 >= length:
-            break
         int_value = int(b)
         for i in reversed(range(8)):
-            if (int_value & (1 << i)) != 0 and (index * 8 + 7 - i < length):
+            if (int_value & (1 << i)) != 0:
                 result[index * 8 + 7 - i] = True
     return result
 
