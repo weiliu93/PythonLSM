@@ -15,10 +15,11 @@ from utils.byte_utils import byte_array_to_integer
 class SSTableBlockIndex(object):
     """SSTable Index for each block, store maximum key"""
 
-    def __init__(self, max_key, offset, length):
+    def __init__(self, max_key, offset, length, filter_offset):
         self.max_key = max_key
         self.offset = offset
         self.length = length
+        self.filter_offset = filter_offset
 
     def serialize(self):
         byte_array = bytearray()
@@ -28,8 +29,10 @@ class SSTableBlockIndex(object):
         byte_array.extend(max_key_object)
         # then append offset
         byte_array.extend(integer_to_four_bytes_array(self.offset))
-        # finally length
+        # next length
         byte_array.extend(integer_to_four_bytes_array(self.length))
+        # finally filter_offset
+        byte_array.extend(integer_to_four_bytes_array(self.filter_offset))
         return bytes(byte_array)
 
     @staticmethod
@@ -50,9 +53,13 @@ class SSTableBlockIndex(object):
         if len(length) != 4:
             return None
         length = byte_array_to_integer(length)
-        return SSTableBlockIndex(max_key, offset, length)
+        filter_offset = file_io.read(4)
+        if len(filter_offset) != 4:
+            return None
+        filter_offset = byte_array_to_integer(filter_offset)
+        return SSTableBlockIndex(max_key, offset, length, filter_offset)
 
     def __str__(self):
-        return "(max_key: {}, offset: {}, length: {})".format(
-            self.max_key, self.offset, self.length
+        return "(max_key: {}, offset: {}, length: {}, filter_offset: {})".format(
+            self.max_key, self.offset, self.length, self.filter_offset
         )

@@ -153,6 +153,8 @@ class BytesBloomFilter(object):
         # special check for common string usage
         if isinstance(value, str):
             value = value.encode("utf-8")
+        elif isinstance(value, int):
+            value = str(value).encode("utf-8")
         assert isinstance(value, bytes)
         return value
 

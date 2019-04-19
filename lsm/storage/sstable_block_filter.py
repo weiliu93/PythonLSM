@@ -18,6 +18,10 @@ class SSTableBlockFilter(object):
         assert block_filter is not None
         self.block_filter = block_filter
 
+    def __contains__(self, item):
+        # delegate contains to block_filter
+        return item in self.block_filter
+
     def serialize(self):
         byte_array = bytearray()
         filter_type_byte_array = pickle.dumps(type(self.block_filter))
